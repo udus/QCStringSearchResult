@@ -129,6 +129,7 @@ void CitationManager::insertCrossReferencesForBibFile(const QCString &bibFile)
   std::string lineStr;
   while (getline(f,lineStr))
   {
+    // Goal refactor int i here to store and use the result of find in an ::iterator instead of int
     int i;
     QCString line = lineStr;
     if (line.stripWhiteSpace().startsWith("@"))
