@@ -52,6 +52,63 @@ struct CitationManager::Private
 {
   std::map< std::string,std::unique_ptr<CiteInfoImpl> > entries;
 };
+//harambe
+// This class is used for a more typesafe assignment for the result of a find operation
+class WholeNumbersFromNegativeOne
+{
+private:
+    int mData;
+public:
+    WholeNumbersFromNegativeOne(const int param){
+        if(param < -1)
+        {
+            mData = -1;
+        }else{
+            mData = param;
+        }
+    }
+    WholeNumbersFromNegativeOne(){mData = -1;} // constructor
+
+    WholeNumbersFromNegativeOne(const WholeNumbersFromNegativeOne&) = default; //copy constructor
+    WholeNumbersFromNegativeOne(WholeNumbersFromNegativeOne&& param) noexcept = default; //move constructor
+
+    WholeNumbersFromNegativeOne& operator=(const WholeNumbersFromNegativeOne& param) = default;
+    WholeNumbersFromNegativeOne& operator=(WholeNumbersFromNegativeOne&& param) noexcept= default;
+    WholeNumbersFromNegativeOne& operator=(int param){
+        return *this = WholeNumbersFromNegativeOne(param);
+    }
+
+    bool operator!=(int param){
+        return mData != param;
+    }
+
+    bool operator==(int param){
+        return mData == param;
+    }
+
+    bool operator<(int param){
+        return mData < param;
+    }
+
+    bool operator>(int param){
+        return mData > param;
+    }
+
+    operator int() const{
+        return mData;
+    }
+
+    int getData(){return mData;}
+
+    void setData(int param){
+            if(param < -1)
+            {
+                mData = -1;
+            }else{
+                mData = param;
+            }
+        }
+};
 
 CitationManager &CitationManager::instance()
 {
@@ -129,8 +186,8 @@ void CitationManager::insertCrossReferencesForBibFile(const QCString &bibFile)
   std::string lineStr;
   while (getline(f,lineStr))
   {
-    // Goal refactor int i here to store and use the result of find in an ::iterator instead of int
-    int i;
+    // Goal refactor int i here to store and use the result of find in value that has a minimal value -1.
+    WholeNumbersFromNegativeOne i;
     QCString line = lineStr;
     if (line.stripWhiteSpace().startsWith("@"))
     {
