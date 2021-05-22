@@ -91,6 +91,122 @@ int qstricmp( const char *str1, const char *str2 );
 
 int qstrnicmp( const char *str1, const char *str2, uint len );
 
+/*
+ *  QCStringSearchResult is an extention to user defined QCString
+ *  during the examination of the Doxygen project I saw that there are many QCString::find() functions
+ *  which return a primite integer.
+ *
+ *  By default QCString::find() return -1 in case the find operation is unsuccessful
+ *  otherwise it return the position of the index of the element which satisfies the search condition.
+ *
+ *  QCStringSearchResult is a substitution for these integers which stores the result of the find() but also behaves
+ *  as an integer so it does not break legaxy Doxygen.
+ *
+ *  Usage:
+ *
+ *  Instead of
+ *      QCString mytext = "almafa";
+ *      int i = mytext.find(m);
+ *      if(i != -1)...
+ *
+ *  Do
+ *      QCString mytext = "almafa";
+ *      QCStringSearchResult i = mytext.find('m');
+ *      if(i)... // if(i.foundValue())...
+ *
+ *  Even after:
+ *      QCString mytext = "almafa";
+ *      QCStringSearchResult i = mytext.find('a');
+ *      i--;
+ * ----------------
+ *      i.foundValue() will remain true
+ */
+class QCStringSearchResult
+{
+    public:
+        // exlicitly not explicit :)
+        QCStringSearchResult(int val) : value_{std::move(val)}{
+            value_ == -1 ? resultFound = false : resultFound = true;
+        };
+
+        bool foundValue() const{
+            return resultFound;
+        }
+
+        operator bool() const {
+            return resultFound;
+        };
+
+        operator int() const {
+            return value_;
+        }
+
+        template <typename T>
+        operator T() const {
+            return T(value_);
+        }
+
+        // prefix increment
+        QCStringSearchResult& operator++()
+        {
+            value_++;
+            return *this; // return new value by reference
+        }
+
+        // postfix increment
+        QCStringSearchResult operator++(int)
+        {
+            QCStringSearchResult old = *this; // copy old value
+            operator++();  // prefix increment
+            return old;    // return old value
+        }
+
+        // prefix decrement
+        QCStringSearchResult& operator--()
+        {
+            value_--;
+            return *this; // return new value by reference
+        }
+
+        // postfix decrement
+        QCStringSearchResult operator--(int)
+        {
+            QCStringSearchResult old = *this; // copy old value
+            operator--();  // prefix decrement
+            return old;
+        }
+
+        template <typename T>
+        int operator+ (T rhs)
+        {
+            return this->value_ + rhs;
+        }
+
+        template <typename T>
+        friend int operator+ (T &lhs, const QCStringSearchResult& rhs)
+        {
+            return lhs + rhs.value_ ;
+        }
+
+        friend std::ostream &operator<<( std::ostream &output, const QCStringSearchResult &result ) {
+            output << result.value_;
+            return output;
+        }
+
+        QCStringSearchResult() = default;
+        ~QCStringSearchResult() = default;
+
+        QCStringSearchResult(const QCStringSearchResult& other) = default;
+        QCStringSearchResult& operator=(QCStringSearchResult& other) = default;
+
+        QCStringSearchResult (QCStringSearchResult && other) = default;
+        QCStringSearchResult& operator= ( QCStringSearchResult && ) = default;
+
+    private:
+        int value_;
+        bool resultFound;
+
+};
 
 /** This is an alternative implementation of QCString. It provides basically
  *  the same functions but uses std::string as the underlying string type

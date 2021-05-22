@@ -52,63 +52,6 @@ struct CitationManager::Private
 {
   std::map< std::string,std::unique_ptr<CiteInfoImpl> > entries;
 };
-//harambe
-// This class is used for a more typesafe assignment for the result of a find operation
-class WholeNumbersFromNegativeOne
-{
-private:
-    int mData;
-public:
-    WholeNumbersFromNegativeOne(const int param){
-        if(param < -1)
-        {
-            mData = -1;
-        }else{
-            mData = param;
-        }
-    }
-    WholeNumbersFromNegativeOne(){mData = -1;} // constructor
-
-    WholeNumbersFromNegativeOne(const WholeNumbersFromNegativeOne&) = default; //copy constructor
-    WholeNumbersFromNegativeOne(WholeNumbersFromNegativeOne&& param) noexcept = default; //move constructor
-
-    WholeNumbersFromNegativeOne& operator=(const WholeNumbersFromNegativeOne& param) = default;
-    WholeNumbersFromNegativeOne& operator=(WholeNumbersFromNegativeOne&& param) noexcept= default;
-    WholeNumbersFromNegativeOne& operator=(int param){
-        return *this = WholeNumbersFromNegativeOne(param);
-    }
-
-    bool operator!=(int param){
-        return mData != param;
-    }
-
-    bool operator==(int param){
-        return mData == param;
-    }
-
-    bool operator<(int param){
-        return mData < param;
-    }
-
-    bool operator>(int param){
-        return mData > param;
-    }
-
-    operator int() const{
-        return mData;
-    }
-
-    int getData(){return mData;}
-
-    void setData(int param){
-            if(param < -1)
-            {
-                mData = -1;
-            }else{
-                mData = param;
-            }
-        }
-};
 
 CitationManager &CitationManager::instance()
 {
@@ -186,15 +129,15 @@ void CitationManager::insertCrossReferencesForBibFile(const QCString &bibFile)
   std::string lineStr;
   while (getline(f,lineStr))
   {
-    // Goal refactor int i here to store and use the result of find in value that has a minimal value -1.
-    WholeNumbersFromNegativeOne i;
+    // Usage pf QCStromgSearchResult is demonstrated here. Doxygen is full of primitive integers which stores this result.
+    QCStringSearchResult i;
     QCString line = lineStr;
     if (line.stripWhiteSpace().startsWith("@"))
     {
       // assumption entry like: "@book { name," or "@book { name" (spaces optional)
-      int j = line.find('{');
+      QCStringSearchResult j = line.find('{');
       // when no {, go hunting for it
-      while (j==-1 && getline(f,lineStr))
+      while (!j.foundValue() && getline(f,lineStr))
       {
         line = lineStr;
         j = line.find('{');
@@ -203,13 +146,13 @@ void CitationManager::insertCrossReferencesForBibFile(const QCString &bibFile)
       citeName = "";
       if (!f.eof() && j!=-1) // to prevent something like "@manual ," and no { found
       {
-        int k = line.find(',',j);
+        QCStringSearchResult k = line.find(',',j);
         j++;
         // found a line "@....{.....,...." or "@.....{....."
         //                     ^=j  ^=k               ^=j   k=-1
         while (!f.eof() && citeName.isEmpty())
         {
-          if (k!=-1)
+          if (k)
           {
             citeName = line.mid((uint)(j),(uint)(k-j));
           }
@@ -228,7 +171,7 @@ void CitationManager::insertCrossReferencesForBibFile(const QCString &bibFile)
       }
       //printf("citeName = #%s#\n",citeName.data());
     }
-    else if ((i=line.find("crossref"))!=-1 && !citeName.isEmpty()) /* assumption cross reference is on one line and the only item */
+    else if ((i=line.find("crossref")) && !citeName.isEmpty()) /* assumption cross reference is on one line and the only item */
     {
       int j = line.find('{',i);
       int k = line.find('}',i);
