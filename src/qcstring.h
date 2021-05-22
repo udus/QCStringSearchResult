@@ -129,17 +129,11 @@ class QCStringSearchResult
             value_ == -1 ? resultFound = false : resultFound = true;
         };
 
-        bool foundValue() const{
-            return resultFound;
-        }
+        bool foundValue() const;
 
-        operator bool() const {
-            return resultFound;
-        };
+        operator bool() const;
 
-        operator int() const {
-            return value_;
-        }
+        operator int() const;
 
         template <typename T>
         operator T() const {
@@ -147,52 +141,35 @@ class QCStringSearchResult
         }
 
         // prefix increment
-        QCStringSearchResult& operator++()
-        {
-            value_++;
-            return *this; // return new value by reference
-        }
+        QCStringSearchResult& operator++();
 
         // postfix increment
-        QCStringSearchResult operator++(int)
-        {
-            QCStringSearchResult old = *this; // copy old value
-            operator++();  // prefix increment
-            return old;    // return old value
-        }
+        QCStringSearchResult operator++(int);
 
         // prefix decrement
-        QCStringSearchResult& operator--()
-        {
-            value_--;
-            return *this; // return new value by reference
-        }
+        QCStringSearchResult& operator--();
 
         // postfix decrement
-        QCStringSearchResult operator--(int)
-        {
-            QCStringSearchResult old = *this; // copy old value
-            operator--();  // prefix decrement
-            return old;
-        }
+        QCStringSearchResult operator--(int);
 
         template <typename T>
-        int operator+ (T rhs)
+        int operator+(T rhs)
         {
             return this->value_ + rhs;
         }
 
+
         template <typename T>
-        friend int operator+ (T &lhs, const QCStringSearchResult& rhs)
+        friend int operator+(T &lhs, const QCStringSearchResult& rhs)
         {
             return lhs + rhs.value_ ;
         }
 
-        friend std::ostream &operator<<( std::ostream &output, const QCStringSearchResult &result ) {
+
+        friend std::ostream& operator<<( std::ostream &output, const QCStringSearchResult &result ) {
             output << result.value_;
             return output;
         }
-
         QCStringSearchResult() = default;
         ~QCStringSearchResult() = default;
 

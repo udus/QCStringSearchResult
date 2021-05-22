@@ -558,3 +558,48 @@ QCString substitute(const QCString &s,const QCString &src,const QCString &dst,in
   return result;
 }
 
+
+bool QCStringSearchResult::foundValue() const{
+    return resultFound;
+}
+
+QCStringSearchResult::operator bool() const {
+    return resultFound;
+}
+
+QCStringSearchResult::operator int() const {
+    return value_;
+}
+
+// prefix increment
+QCStringSearchResult& QCStringSearchResult::operator++()
+{
+    value_++;
+    return *this; // return new value by reference
+}
+
+// postfix increment
+QCStringSearchResult QCStringSearchResult::operator++(int)
+{
+    QCStringSearchResult old = *this; // copy old value
+    operator++();  // prefix increment
+    return old;    // return old value
+}
+
+// prefix decrement
+QCStringSearchResult& QCStringSearchResult::operator--()
+{
+    value_--;
+    return *this; // return new value by reference
+}
+
+// postfix decrement
+QCStringSearchResult QCStringSearchResult::operator--(int)
+{
+    QCStringSearchResult old = *this; // copy old value
+    operator--();  // prefix decrement
+    return old;
+}
+
+
+
